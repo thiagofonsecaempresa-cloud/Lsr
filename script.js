@@ -1,21 +1,21 @@
 const ITEMS=[
 ["Lençol de solteiro com elástico","Lençóis"],["Lençol de solteiro sem elástico","Lençóis"],["Lençol de casal com elástico","Lençóis"],["Lençol de casal sem elástico","Lençóis"],["Fronha","Roupa de cama"],
-["Toalha de banho","Toalhas"],["Toalha de mãos","Toalhas"],["Edredom de solteiro","Edredons"],["Edredom de casal","Edredons"],["Travesseiro","Outros"],["Cortina de cama","Outros"],["Cobertor de solteiro","Cobertores"],["Cobertor de casal","Cobertores"],["Cobertor fino de casal","Cobertores"]
+["Toalha de banho","Toalhas"],["Toalha de mãos","Toalhas"],["Edredom de solteiro","Edredons"],["Edredom de casal","Edredons"],["Travesseiro","Outros"],["Cortina de cama","Outros"],["Cobertor de solteiro","Cobertores"],["Cobertor de casal","Cobertores"]
 ];
 const DEFAULT={
 version:1, createdAt:new Date().toISOString(),
 config:{roomsCouple:16,sharedRooms:1,singleBedsShared:4,workDays:5,startTime:"08:00",endTime:"17:00",breakMinutes:60,targetBuffer:25,occupancy:"",linenChanges:3,washer1:13,washer2:18,dryer1:11,dryer2:11,washCycle:60,dryCycle:60,curtainInterval:30},
-records:[], stock:null, stockHistory:[], notes:""
+records:[], qualityRecords:[], stock:null, stockHistory:[], notes:""
 };
 let db=loadDB();
-function loadDB(){try{const x=JSON.parse(localStorage.getItem("hostelLaundry_v1"));if(x&&x.version===1)return {...structuredClone(DEFAULT),...x,config:{...DEFAULT.config,...x.config}};}catch(e){}return structuredClone(DEFAULT)}
+function loadDB(){try{const x=JSON.parse(localStorage.getItem("hostelLaundry_v1"));if(x&&x.version===1){const loaded={...structuredClone(DEFAULT),...x,config:{...DEFAULT.config,...x.config}};loaded.records=(loaded.records||[]).map(r=>r.item==="Cobertor fino de casal"?{...r,item:"Cobertor de casal"}:r);loaded.qualityRecords=Array.isArray(loaded.qualityRecords)?loaded.qualityRecords:[];if(loaded.stock?.items?.["Cobertor fino de casal"]){const old=loaded.stock.items["Cobertor fino de casal"];loaded.stock.items["Cobertor de casal"]=loaded.stock.items["Cobertor de casal"]||{};for(const k of ["clean","inUse","dirty","unusable"]){if(old[k]!==undefined)loaded.stock.items["Cobertor de casal"][k]=num(loaded.stock.items["Cobertor de casal"][k])+num(old[k]);}delete loaded.stock.items["Cobertor fino de casal"];}return loaded;}}catch(e){}return structuredClone(DEFAULT)}
 function persist(){try{localStorage.setItem("hostelLaundry_v1",JSON.stringify(db));document.getElementById("saveState").textContent="● Salvo neste aparelho";}catch(e){document.getElementById("saveState").textContent="⚠ Falha ao salvar";alert("Não foi possível salvar no navegador. Exporte um backup e verifique o espaço disponível.");}}
 function today(){let d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function num(v){return Number.isFinite(Number(v))?Number(v):0}
 function fmt(n){return Math.round(n).toLocaleString("pt-BR")}
 function dateFmt(s){if(!s)return "—";const [y,m,d]=s.split("-");return `${d}/${m}/${y}`}
-function switchTab(id){document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===id));document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));if(id==="painel")renderDashboard();if(id==="registro")renderRecords();if(id==="estoque")renderStock();if(id==="previsao")renderForecast();if(id==="config")renderConfig();if(id==="dados")renderDataStats();window.scrollTo({top:0,behavior:"smooth"})}
+function switchTab(id){document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.tab===id));document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));if(id==="painel")renderDashboard();if(id==="registro")renderRecords();if(id==="estoque")renderStock();if(id==="qualidade")renderQuality();if(id==="previsao")renderForecast();if(id==="config")renderConfig();if(id==="dados")renderDataStats();window.scrollTo({top:0,behavior:"smooth"})}
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
 function populateItemSelect(){document.getElementById("pItem").innerHTML=ITEMS.map(([n])=>`<option>${esc(n)}</option>`).join("")}
 function initFields(){
@@ -93,15 +93,55 @@ for(const id of ["roomsCouple","sharedRooms","singleBedsShared","workDays","star
 const kit=[["Quarto de casal","1 lençol casal com elástico; 1 sem elástico; 2 fronhas; 2 toalhas de banho; 1 edredom casal; 1 cobertor fino casal"],["Quarto compartilhado","4 lençóis solteiro com elástico; 4 sem elástico; 4 fronhas; 4 toalhas de banho; 1 toalha de mãos"],["Cortina de cama","Troca aproximada mensal ou quando necessário"],["Longa permanência","3 trocas semanais conforme informação inicial"]];
 document.getElementById("kitTable").innerHTML=`<div class="tablewrap"><table><thead><tr><th>Regra</th><th>Composição / frequência registrada</th></tr></thead><tbody>${kit.map(a=>`<tr><td><b>${esc(a[0])}</b></td><td>${esc(a[1])}</td></tr>`).join("")}</tbody></table></div>`;
 }
-function renderDataStats(){document.getElementById("dataStats").innerHTML=`<p><b>Registros de produção:</b> ${db.records.length}</p><p><b>Inventários guardados no histórico:</b> ${db.stockHistory.length}</p><p><b>Último inventário:</b> ${db.stock?dateFmt(db.stock.date):"não realizado"}</p><p><b>Último backup exportado:</b> não rastreado pelo aplicativo</p>`}
-function renderAll(){renderDashboard();renderRecords();renderStock();renderForecast();renderConfig();renderDataStats()}
+function renderDataStats(){document.getElementById("dataStats").innerHTML=`<p><b>Registros de produção:</b> ${db.records.length}</p><p><b>Ocorrências de qualidade:</b> ${(db.qualityRecords||[]).length}</p><p><b>Inventários guardados no histórico:</b> ${db.stockHistory.length}</p><p><b>Último inventário:</b> ${db.stock?dateFmt(db.stock.date):"não realizado"}</p><p><b>Último backup exportado:</b> não rastreado pelo aplicativo</p>`}
+
+function initQuality(){
+  const opts=ITEMS.map(([name])=>`<option>${esc(name)}</option>`).join("");
+  document.getElementById("qItem").innerHTML=opts;
+  document.getElementById("qFilterItem").innerHTML='<option value="">Todas as peças</option>'+opts;
+  document.getElementById("qDate").value=today();
+  document.getElementById("qualityForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    const rec={id:crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random(),date:document.getElementById("qDate").value,item:document.getElementById("qItem").value,qty:Math.max(1,Math.floor(num(document.getElementById("qQty").value))),defect:document.getElementById("qDefect").value,stage:document.getElementById("qStage").value,action:document.getElementById("qAction").value,status:document.getElementById("qStatus").value,responsible:document.getElementById("qResponsible").value.trim(),notes:document.getElementById("qNotes").value.trim(),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+    db.qualityRecords.unshift(rec);persist();renderQuality();renderDataStats();e.target.reset();document.getElementById("qDate").value=today();document.getElementById("qQty").value=1;alert("Ocorrência registrada.");
+  });
+  document.getElementById("qFilterStatus").addEventListener("change",renderQuality);
+  document.getElementById("qFilterItem").addEventListener("change",renderQuality);
+}
+function updateQualityStatus(id,status){
+ const rec=db.qualityRecords.find(r=>r.id===id);if(!rec)return;
+ rec.status=status;rec.updatedAt=new Date().toISOString();
+ if(status==="Descartada")rec.action="Descartar";
+ if(status==="Recuperada"&&["Descartar","Separar para avaliação"].includes(rec.action))rec.action="Devolver para uso";
+ persist();renderQuality();renderDataStats();
+}
+function deleteQualityRecord(id){if(!confirm("Excluir esta ocorrência do histórico?"))return;db.qualityRecords=db.qualityRecords.filter(r=>r.id!==id);persist();renderQuality();renderDataStats();}
+function renderQuality(){
+ if(!document.getElementById("qualityTable"))return;
+ const list=db.qualityRecords||[];
+ const status=document.getElementById("qFilterStatus")?.value||"",item=document.getElementById("qFilterItem")?.value||"";
+ const filtered=list.filter(r=>(!status||r.status===status)&&(!item||r.item===item));
+ const sum=(arr,st)=>arr.filter(r=>!st||r.status===st).reduce((a,r)=>a+num(r.qty),0);
+ document.getElementById("qOpen").textContent=fmt(list.filter(r=>!["Recuperada","Descartada"].includes(r.status)).length);
+ document.getElementById("qWaiting").textContent=fmt(list.filter(r=>["Aberta","Aguardando avaliação","Em tratamento"].includes(r.status)).reduce((a,r)=>a+num(r.qty),0));
+ document.getElementById("qRecovered").textContent=fmt(sum(list,"Recuperada"));
+ document.getElementById("qDiscarded").textContent=fmt(sum(list,"Descartada"));
+ const counts={};list.filter(r=>!["Recuperada","Descartada"].includes(r.status)).forEach(r=>counts[r.item]=(counts[r.item]||0)+num(r.qty));
+ const top=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+ document.getElementById("qualityByItem").innerHTML=top.length?'<h3>Peças aguardando solução</h3>'+top.map(([n,q])=>`<div class="quality-line"><span>${esc(n)}</span><b>${fmt(q)} peça(s)</b></div>`).join(""):'<p class="muted small">Nenhuma ocorrência pendente registrada.</p>';
+ if(!filtered.length){document.getElementById("qualityTable").innerHTML='<p class="muted small">Nenhuma ocorrência para os filtros selecionados.</p>';return;}
+ document.getElementById("qualityTable").innerHTML=`<div class="tablewrap"><table><thead><tr><th>Data</th><th>Peça / quantidade</th><th>Defeito</th><th>Etapa</th><th>Providência</th><th>Situação</th><th>Responsável / observações</th><th>Ações</th></tr></thead><tbody>${filtered.map(r=>`<tr><td>${dateFmt(r.date)}</td><td>${esc(r.item)}<br><b>${fmt(r.qty)} un.</b></td><td>${esc(r.defect)}</td><td>${esc(r.stage)}</td><td>${esc(r.action)}</td><td><span class="pill ${r.status==="Descartada"?"bad":r.status==="Recuperada"?"good":"warn"}">${esc(r.status)}</span></td><td>${esc(r.responsible||"—")}<br><span class="small muted">${esc(r.notes||"")}</span></td><td><div class="quality-actions"><select aria-label="Atualizar situação" onchange="updateQualityStatus('${esc(r.id)}',this.value)">${["Aberta","Aguardando avaliação","Em tratamento","Recuperada","Descartada"].map(s=>`<option ${r.status===s?"selected":""}>${s}</option>`).join("")}</select><button class="btn danger smallbtn" onclick="deleteQualityRecord('${esc(r.id)}')">Excluir</button></div></td></tr>`).join("")}</tbody></table></div>`;
+}
+function exportQualityCSV(){const header=["data","peca","quantidade","defeito","etapa_identificacao","providencia","situacao","responsavel","observacoes"];const rows=(db.qualityRecords||[]).map(r=>[r.date,r.item,r.qty,r.defect,r.stage,r.action,r.status,r.responsible,r.notes]);download(`qualidade-lavanderia-${today()}.csv`,"\ufeff"+[header,...rows].map(r=>r.map(csvEscape).join(";")).join("\r\n"),"text/csv;charset=utf-8")}
+
+function renderAll(){renderDashboard();renderRecords();renderStock();renderQuality();renderForecast();renderConfig();renderDataStats()}
 function download(filename,content,type){const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
 function exportJSON(){const payload={...db,exportedAt:new Date().toISOString(),app:"Lavanderia do Hostel",developer:"Thiago Fonseca"};download(`backup-lavanderia-${today()}.json`,JSON.stringify(payload,null,2),"application/json")}
 document.getElementById("importFile").addEventListener("change",async e=>{const file=e.target.files[0];if(!file)return;try{const x=JSON.parse(await file.text());if(!x||x.version!==1||!Array.isArray(x.records)||!x.config)throw new Error("Estrutura de backup não reconhecida.");if(!confirm("A importação substituirá os dados atuais deste aparelho. Faça backup antes, se necessário. Continuar?"))return;db={...structuredClone(DEFAULT),...x,config:{...DEFAULT.config,...x.config},records:x.records,stock:x.stock||null,stockHistory:x.stockHistory||[]};persist();initFields();renderAll();alert("Backup importado com sucesso.");}catch(err){alert("Não foi possível importar o arquivo: "+err.message)}finally{e.target.value=""}});
 function csvEscape(v){return '"'+String(v??"").replace(/"/g,'""')+'"'}
 function exportCSV(){const header=["data","responsavel_etapa","peca","quantidade","etapa","tempo_minutos","inicio","fim","observacoes"];const rows=db.records.map(r=>[r.date,r.worker,r.item,r.qty,r.stage,r.minutes,r.start,r.end,r.notes]);download(`producao-lavanderia-${today()}.csv`,"\ufeff"+[header,...rows].map(r=>r.map(csvEscape).join(";")).join("\r\n"),"text/csv;charset=utf-8")}
 function exportStockCSV(){const rows=[["peca","limpa","em_uso","suja_processamento","inservivel"]];ITEMS.forEach(([name])=>{const s=db.stock?.items?.[name]||{};rows.push([name,s.clean??"",s.inUse??"",s.dirty??"",s.unusable??""])});download(`inventario-lavanderia-${today()}.csv`,"\ufeff"+rows.map(r=>r.map(csvEscape).join(";")).join("\r\n"),"text/csv;charset=utf-8")}
-function exportAnalysis(){const daily={};[...new Set(db.records.map(r=>r.date))].sort().forEach(d=>{daily[d]={received:stageSum(d,"Recebidas"),washed:stageSum(d,"Lavadas"),dried:stageSum(d,"Secas"),finished:stageSum(d,"Passadas/finalizadas"),pending:stageSum(d,"Pendentes ao fim do dia"),minutes:minsSum(d)}});const payload={app:"Lavanderia do Hostel",developer:"Thiago Fonseca",generatedAt:new Date().toISOString(),config:db.config,stock:db.stock,records:db.records,dailySummary:daily,derived:{averageReceivedPerRecordedDay:estimateDemandPerDay(),finishingPiecesPerHour:productionRate(),configuredAvailableHoursPerDay:hoursAvailable(),stockTotals:stockTotals()},notes:"Previsões simples com base nos registros disponíveis; valores ausentes não devem ser interpretados como zero."};download(`analise-lavanderia-${today()}.json`,JSON.stringify(payload,null,2),"application/json")}
+function exportAnalysis(){const daily={};[...new Set(db.records.map(r=>r.date))].sort().forEach(d=>{daily[d]={received:stageSum(d,"Recebidas"),washed:stageSum(d,"Lavadas"),dried:stageSum(d,"Secas"),finished:stageSum(d,"Passadas/finalizadas"),pending:stageSum(d,"Pendentes ao fim do dia"),minutes:minsSum(d)}});const payload={app:"Lavanderia do Hostel",developer:"Thiago Fonseca",generatedAt:new Date().toISOString(),config:db.config,stock:db.stock,records:db.records,qualityRecords:db.qualityRecords||[],dailySummary:daily,derived:{averageReceivedPerRecordedDay:estimateDemandPerDay(),finishingPiecesPerHour:productionRate(),configuredAvailableHoursPerDay:hoursAvailable(),stockTotals:stockTotals()},notes:"Previsões simples com base nos registros disponíveis; valores ausentes não devem ser interpretados como zero."};download(`analise-lavanderia-${today()}.json`,JSON.stringify(payload,null,2),"application/json")}
 function resetData(){if(!confirm("Tem certeza? Isso apagará todos os dados locais deste navegador. Exporte um backup antes. Esta ação não pode ser desfeita."))return;if(!confirm("Confirme novamente para apagar o histórico, o inventário e as configurações."))return;localStorage.removeItem("hostelLaundry_v1");db=structuredClone(DEFAULT);initFields();populateItemSelect();renderAll();alert("Dados locais apagados.")}
 
 async function exportExcel(){
@@ -146,6 +186,7 @@ async function exportExcel(){
     {name:"Inventário",title:"INVENTÁRIO FÍSICO",subtitle:"Campos sem contagem permanecem vazios; não representam estoque zero",headers:["Peça / categoria","Limpa","Em uso","Suja / processamento","Inservível","Total contado","Última contagem","Observações"],rows:stockRows,widths:[36,14,14,24,15,17,18,42]},
     {name:"Indicadores",title:"INDICADORES E CONFIGURAÇÕES",subtitle:"Métricas derivadas dos registros disponíveis · Unidade São Roque",headers:["Indicador","Valor"],rows:metricRows,widths:[50,92]},
     {name:"Resumo por etapa",title:"RESUMO POR ETAPA",subtitle:"Total de quantidades registradas; não representa necessariamente saldo físico",headers:["Etapa","Quantidade total registrada (peças)"],rows:Object.entries(byStage).sort((a,b)=>a[0].localeCompare(b[0])),widths:[34,42]},
+    {name:"Qualidade",title:"QUALIDADE E OCORRÊNCIAS",subtitle:"Histórico de peças manchadas, rasgadas, recuperadas ou descartadas",headers:["Data","Peça","Quantidade","Defeito","Etapa","Providência","Situação","Responsável","Observações"],rows:(db.qualityRecords||[]).map(r=>[r.date?new Date(r.date+"T12:00:00"):"",r.item,r.qty,r.defect,r.stage,r.action,r.status,r.responsible,r.notes]),widths:[15,34,14,22,25,30,24,22,42]},
     {name:"Configuração",title:"CONFIGURAÇÃO DO SISTEMA",subtitle:"Unidade São Roque · Valores definidos no aplicativo",headers:["Campo","Valor"],rows:configRows,widths:[42,42]}
   ];
   const sheetXml=defs.map((d,i)=>buildSheet(d,i+1));
@@ -173,4 +214,4 @@ async function exportExcel(){
   const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`lavanderia-sao-roque-${today()}.xlsx`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2000);
 }
 
-populateItemSelect();initFields();document.getElementById("todayLabel").textContent=dateFmt(today());renderAll();
+populateItemSelect();initFields();initQuality();document.getElementById("todayLabel").textContent=dateFmt(today());renderAll();

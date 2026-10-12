@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#163b35">
+<meta name="theme-color" content="#172f4f">
 <title>Lavanderia do Hostel | Unidade São Roque</title>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -11,7 +11,7 @@
 <header><div class="inner headrow"><div><h1>Lavanderia do Hostel</h1><p>Unidade São Roque · Enxoval, produtividade, capacidade e previsões</p></div><div class="saved" id="saveState">● Dados locais</div></div></header>
 <main>
 <nav class="tabs">
-<button class="tab active" data-tab="painel">Painel</button><button class="tab" data-tab="registro">Produção diária</button><button class="tab" data-tab="estoque">Inventário</button><button class="tab" data-tab="previsao">Previsões</button><button class="tab" data-tab="config">Configuração</button><button class="tab" data-tab="dados">Backup e relatórios</button>
+<button class="tab active" data-tab="painel">Painel</button><button class="tab" data-tab="registro">Produção diária</button><button class="tab" data-tab="estoque">Inventário</button><button class="tab" data-tab="qualidade">Qualidade</button><button class="tab" data-tab="previsao">Previsões</button><button class="tab" data-tab="config">Configuração</button><button class="tab" data-tab="dados">Backup e relatórios</button>
 </nav>
 
 <section class="view active" id="painel">
@@ -26,6 +26,7 @@
 <div class="card"><h2>Insights automáticos</h2><div id="insights"></div></div>
 <div class="card"><h2>Capacidade e jornada</h2><div id="capacitySummary"></div><div class="actions"><button class="btn secondary" onclick="switchTab('registro')">Registrar produção</button><button class="btn secondary" onclick="switchTab('estoque')">Fazer inventário</button></div></div>
 </div>
+<div class="card quick-export"><h2>Exportar e importar dados</h2><p class="muted small">Acesso rápido aos arquivos da unidade São Roque. O Excel gera uma planilha .xlsx; CSV abre em planilhas; JSON guarda ou restaura o backup completo.</p><div class="actions"><button class="btn" onclick="exportExcel()">Exportar Excel (.xlsx)</button><button class="btn secondary" onclick="exportCSV()">Exportar produção CSV</button><button class="btn secondary" onclick="exportStockCSV()">Exportar inventário CSV</button><button class="btn secondary" onclick="exportJSON()">Exportar backup JSON</button><button class="btn secondary" onclick="document.getElementById('importFile').click()">Importar backup JSON</button><button class="btn secondary" onclick="exportAnalysis()">Exportar pacote de análise JSON</button></div></div>
 <div class="card"><h2>Últimos registros</h2><div id="recentRecords"></div></div>
 </section>
 
@@ -53,10 +54,43 @@
 
 <section class="view" id="estoque">
 <div class="sectionhead"><h2>Inventário e estoque</h2><span class="muted small">Faça a contagem física e atualize os saldos.</span></div>
-<div class="notice neutral">O inventário começa vazio. Preencha apenas quantidades realmente contadas. Separe peças limpas, em uso, sujas/em processamento e inservíveis. Os números não contados não serão tratados como zero.</div>
+<div class="notice neutral">O inventário começa vazio. Preencha apenas quantidades realmente contadas. Separe peças limpas, em uso, sujas/em processamento e inservíveis. Registre peças manchadas ou rasgadas na tela Qualidade. Os números não contados não serão tratados como zero.</div>
 <div class="card"><h2>Contagem física por peça</h2><p class="muted small">Informe as quantidades contadas em cada estado. Deixe em branco o que ainda não foi contado.</p><div id="stockForm"></div>
-<div class="field" style="margin-top:12px"><label for="stockDate">Data do inventário</label><input type="date" id="stockDate"></div><div class="field"><label for="stockNotes">Observações gerais</label><textarea id="stockNotes" rows="2" placeholder="Peças manchadas, rasgadas, faltantes etc."></textarea></div><div class="actions"><button class="btn" onclick="saveStock()">Salvar inventário</button><button class="btn secondary" onclick="clearStockForm()">Limpar campos</button></div></div>
+<div class="field" style="margin-top:12px"><label for="stockDate">Data do inventário</label><input type="date" id="stockDate"></div><div class="field"><label for="stockNotes">Observações gerais</label><textarea id="stockNotes" rows="2" placeholder="Observações gerais da contagem; registre defeitos individualmente na tela Qualidade."></textarea></div><div class="actions"><button class="btn" onclick="saveStock()">Salvar inventário</button><button class="btn secondary" onclick="clearStockForm()">Limpar campos</button></div></div>
 <div class="card"><h2>Saldo atual informado</h2><div id="stockSummary"></div></div>
+</section>
+
+<section class="view" id="qualidade">
+<div class="sectionhead"><h2>Qualidade e ocorrências</h2><span class="muted small">Peças com defeito, tratamento e destino.</span></div>
+<div class="grid quality-metrics">
+<div class="card"><div class="metriclabel">Ocorrências em aberto</div><div class="metric" id="qOpen">0</div></div>
+<div class="card"><div class="metriclabel">Peças aguardando decisão</div><div class="metric" id="qWaiting">0</div></div>
+<div class="card"><div class="metriclabel">Peças recuperadas</div><div class="metric" id="qRecovered">0</div></div>
+<div class="card"><div class="metriclabel">Peças descartadas</div><div class="metric" id="qDiscarded">0</div></div>
+</div>
+<div class="two">
+<div class="card"><h2>Registrar ocorrência</h2>
+<form id="qualityForm">
+<div class="formgrid">
+<div class="field"><label for="qDate">Data</label><input type="date" id="qDate" required></div>
+<div class="field"><label for="qItem">Tipo de peça</label><select id="qItem" required></select></div>
+<div class="field"><label for="qQty">Quantidade afetada (peças)</label><input type="number" id="qQty" min="1" step="1" value="1" required></div>
+<div class="field"><label for="qDefect">Defeito identificado</label><select id="qDefect" required><option>Manchada</option><option>Rasgada</option><option>Descosturada</option><option>Desbotada</option><option>Encardida</option><option>Odor persistente</option><option>Desgaste</option><option>Outro</option></select></div>
+<div class="field"><label for="qStage">Identificado em</label><select id="qStage"><option>Recebimento</option><option>Lavagem</option><option>Secagem</option><option>Passadoria/finalização</option><option>Inventário</option><option>Uso no quarto</option></select></div>
+<div class="field"><label for="qAction">Providência</label><select id="qAction"><option>Avaliar</option><option>Tentar remover mancha</option><option>Lavar novamente</option><option>Reparar</option><option>Separar para avaliação</option><option>Descartar</option><option>Devolver para uso</option></select></div>
+<div class="field"><label for="qStatus">Situação inicial</label><select id="qStatus"><option value="Aberta">Aberta</option><option value="Aguardando avaliação">Aguardando avaliação</option><option value="Em tratamento">Em tratamento</option><option value="Recuperada">Recuperada</option><option value="Descartada">Descartada</option></select></div>
+<div class="field"><label for="qResponsible">Responsável</label><input id="qResponsible" placeholder="Nome (opcional)"></div>
+<div class="field full"><label for="qNotes">Observações</label><textarea id="qNotes" rows="2" placeholder="Ex.: mancha de maquiagem, rasgo na costura, tentativa realizada..."></textarea></div>
+</div>
+<div class="actions"><button class="btn" type="submit">Salvar ocorrência</button><button class="btn secondary" type="reset">Limpar campos</button></div>
+</form></div>
+<div class="card"><h2>Como usar o controle</h2>
+<div class="notice neutral">Registre a ocorrência quando o defeito for identificado. A peça só deve voltar a ser considerada disponível depois de ser marcada como recuperada e colocada no inventário limpo. Peças descartadas devem ser baixadas do estoque físico.</div>
+<p class="small muted">A ocorrência registra o histórico e a providência, mas não altera automaticamente o inventário. Isso evita contar a mesma peça duas vezes ou descontar peças sem confirmação física.</p>
+<div id="qualityByItem"></div>
+</div>
+</div>
+<div class="card"><div class="sectionhead"><h2>Histórico de ocorrências</h2><button class="btn secondary" onclick="exportQualityCSV()">Exportar qualidade CSV</button></div><div class="formgrid"><div class="field"><label for="qFilterStatus">Filtrar situação</label><select id="qFilterStatus"><option value="">Todas</option><option>Aberta</option><option>Aguardando avaliação</option><option>Em tratamento</option><option>Recuperada</option><option>Descartada</option></select></div><div class="field"><label for="qFilterItem">Filtrar peça</label><select id="qFilterItem"><option value="">Todas as peças</option></select></div></div><div id="qualityTable"></div></div>
 </section>
 
 <section class="view" id="previsao">
