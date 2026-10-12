@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#163b35">
+<title>Lavanderia do Hostel | Unidade São Roque</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header><div class="inner headrow"><div><h1>Lavanderia do Hostel</h1><p>Unidade São Roque · Enxoval, produtividade, capacidade e previsões</p></div><div class="saved" id="saveState">● Dados locais</div></div></header>
+<main>
+<nav class="tabs">
+<button class="tab active" data-tab="painel">Painel</button><button class="tab" data-tab="registro">Produção diária</button><button class="tab" data-tab="estoque">Inventário</button><button class="tab" data-tab="previsao">Previsões</button><button class="tab" data-tab="config">Configuração</button><button class="tab" data-tab="dados">Backup e relatórios</button>
+</nav>
+
+<section class="view active" id="painel">
+<div class="sectionhead"><h2>Resumo da operação</h2><span class="pill" id="todayLabel"></span></div>
+<div class="grid">
+<div class="card"><div class="metriclabel">Peças finalizadas hoje</div><div class="metric" id="mDone">0</div><div class="small muted">Soma das peças finalizadas</div></div>
+<div class="card"><div class="metriclabel">Peças pendentes</div><div class="metric" id="mPending">0</div><div class="small muted">Saldo informado na produção</div></div>
+<div class="card"><div class="metriclabel">Horas registradas hoje</div><div class="metric" id="mHours">0h</div><div class="small muted">Tempo declarado nos registros</div></div>
+<div class="card"><div class="metriclabel">Estoque limpo contado</div><div class="metric" id="mStock">Não informado</div><div class="small muted">Só considera inventário preenchido</div></div>
+</div>
+<div class="two" style="margin-top:12px">
+<div class="card"><h2>Insights automáticos</h2><div id="insights"></div></div>
+<div class="card"><h2>Capacidade e jornada</h2><div id="capacitySummary"></div><div class="actions"><button class="btn secondary" onclick="switchTab('registro')">Registrar produção</button><button class="btn secondary" onclick="switchTab('estoque')">Fazer inventário</button></div></div>
+</div>
+<div class="card"><h2>Últimos registros</h2><div id="recentRecords"></div></div>
+</section>
+
+<section class="view" id="registro">
+<div class="sectionhead"><h2>Produção diária</h2><span class="muted small">Registre as etapas separadamente para medir os gargalos.</span></div>
+<div class="two">
+<div class="card"><h2>Novo registro</h2>
+<form id="productionForm">
+<div class="formgrid">
+<div class="field"><label for="pDate">Data</label><input type="date" id="pDate" required></div>
+<div class="field"><label for="pWorker">Responsável / etapa</label><select id="pWorker"><option>Lavagem e secagem</option><option>Passadoria e finalização</option><option>Equipe / geral</option></select></div>
+<div class="field"><label for="pItem">Tipo de peça</label><select id="pItem"></select></div>
+<div class="field"><label for="pQty">Quantidade (peças)</label><input type="number" id="pQty" min="0" step="1" value="0" required></div>
+<div class="field"><label for="pStage">Etapa registrada</label><select id="pStage"><option>Recebidas</option><option>Lavadas</option><option>Secas</option><option>Passadas/finalizadas</option><option>Pendentes ao fim do dia</option><option>Descartadas</option></select></div>
+<div class="field"><label for="pMinutes">Tempo gasto (minutos)</label><input type="number" id="pMinutes" min="0" step="5" value="0"></div>
+<div class="field"><label for="pStart">Início (opcional)</label><input type="time" id="pStart"></div>
+<div class="field"><label for="pEnd">Fim (opcional)</label><input type="time" id="pEnd"></div>
+<div class="field full"><label for="pNotes">Observações</label><textarea id="pNotes" rows="2" placeholder="Ex.: secagem extra, máquina parada, urgência..."></textarea></div>
+</div>
+<div class="actions"><button class="btn" type="submit">Salvar registro</button><button class="btn secondary" type="reset">Limpar campos</button></div>
+</form></div>
+<div class="card"><h2>Histórico de produção</h2><div class="formgrid"><div class="field"><label for="filterFrom">De</label><input type="date" id="filterFrom"></div><div class="field"><label for="filterTo">Até</label><input type="date" id="filterTo"></div></div><div class="actions"><button class="btn secondary" onclick="renderRecords()">Aplicar filtro</button><button class="btn secondary" onclick="clearFilters()">Limpar filtro</button></div><div id="recordTable" style="margin-top:12px"></div></div>
+</div>
+</section>
+
+<section class="view" id="estoque">
+<div class="sectionhead"><h2>Inventário e estoque</h2><span class="muted small">Faça a contagem física e atualize os saldos.</span></div>
+<div class="notice neutral">O inventário começa vazio. Preencha apenas quantidades realmente contadas. Separe peças limpas, em uso, sujas/em processamento e inservíveis. Os números não contados não serão tratados como zero.</div>
+<div class="card"><h2>Contagem física por peça</h2><p class="muted small">Informe as quantidades contadas em cada estado. Deixe em branco o que ainda não foi contado.</p><div id="stockForm"></div>
+<div class="field" style="margin-top:12px"><label for="stockDate">Data do inventário</label><input type="date" id="stockDate"></div><div class="field"><label for="stockNotes">Observações gerais</label><textarea id="stockNotes" rows="2" placeholder="Peças manchadas, rasgadas, faltantes etc."></textarea></div><div class="actions"><button class="btn" onclick="saveStock()">Salvar inventário</button><button class="btn secondary" onclick="clearStockForm()">Limpar campos</button></div></div>
+<div class="card"><h2>Saldo atual informado</h2><div id="stockSummary"></div></div>
+</section>
+
+<section class="view" id="previsao">
+<div class="sectionhead"><h2>Previsão de demanda e capacidade</h2><span class="muted small">As estimativas melhoram conforme entram dados reais.</span></div>
+<div class="notice neutral">A previsão inicial usa o histórico registrado. Sem histórico suficiente, o sistema informa a limitação em vez de inventar números. Para prever demanda com base na ocupação, registre as peças recebidas e, quando disponível, alimente a ocupação prevista nas configurações.</div>
+<div class="grid">
+<div class="card"><div class="metriclabel">Média diária recebida</div><div class="metric" id="fDaily">—</div><div class="small muted">Últimos 28 dias com registros</div></div>
+<div class="card"><div class="metriclabel">Previsão 5 dias úteis</div><div class="metric" id="fWeek">—</div><div class="small muted">Com base no histórico recente</div></div>
+<div class="card"><div class="metriclabel">Previsão próximos 30 dias</div><div class="metric" id="fMonth">—</div><div class="small muted">Estimativa simples, não garantia</div></div>
+<div class="card"><div class="metriclabel">Finalizadas por hora</div><div class="metric" id="fRate">—</div><div class="small muted">Somente registros com tempo informado</div></div>
+</div>
+<div class="two" style="margin-top:12px">
+<div class="card"><h2>Demanda por dia da semana</h2><div id="weekdayForecast"></div></div>
+<div class="card"><h2>Capacidade x demanda</h2><div id="capacityForecast"></div></div>
+</div>
+<div class="card"><h2>Previsão por categoria</h2><div id="itemForecast"></div></div>
+</section>
+
+<section class="view" id="config">
+<div class="sectionhead"><h2>Configuração da operação</h2></div>
+<div class="two">
+<div class="card"><h2>Estrutura do hostel e jornada</h2>
+<form id="configForm">
+<div class="formgrid">
+<div class="field"><label for="roomsCouple">Quartos com cama de casal</label><input id="roomsCouple" type="number" min="0" step="1"></div>
+<div class="field"><label for="sharedRooms">Quartos compartilhados</label><input id="sharedRooms" type="number" min="0" step="1"></div>
+<div class="field"><label for="singleBedsShared">Camas de solteiro no compartilhado</label><input id="singleBedsShared" type="number" min="0" step="1"></div>
+<div class="field"><label for="workDays">Dias de trabalho por semana</label><input id="workDays" type="number" min="1" max="7" step="1"></div>
+<div class="field"><label for="startTime">Início da jornada desejada</label><input id="startTime" type="time"></div>
+<div class="field"><label for="endTime">Fim da jornada desejada</label><input id="endTime" type="time"></div>
+<div class="field"><label for="breakMinutes">Pausas e intervalo (min/dia)</label><input id="breakMinutes" type="number" min="0" step="5"></div>
+<div class="field"><label for="targetBuffer">Margem de segurança (%)</label><input id="targetBuffer" type="number" min="0" max="200" step="5"></div>
+<div class="field"><label for="occupancy">Ocupação média estimada (%) (opcional)</label><input id="occupancy" type="number" min="0" max="100" step="5" placeholder="Ainda não informada"></div>
+<div class="field"><label for="linenChanges">Trocas semanais em longa permanência</label><input id="linenChanges" type="number" min="0" max="14" step="1"></div>
+</div><div class="actions"><button class="btn" type="submit">Salvar configurações</button></div>
+</form>
+</div>
+<div class="card"><h2>Equipamentos</h2>
+<form id="machineForm">
+<div class="formgrid">
+<div class="field"><label for="washer1">Lavadora 1 (kg)</label><input id="washer1" type="number" min="0" step="0.5"></div>
+<div class="field"><label for="washer2">Lavadora 2 (kg)</label><input id="washer2" type="number" min="0" step="0.5"></div>
+<div class="field"><label for="dryer1">Secadora 1 (kg)</label><input id="dryer1" type="number" min="0" step="0.5"></div>
+<div class="field"><label for="dryer2">Secadora 2 (kg)</label><input id="dryer2" type="number" min="0" step="0.5"></div>
+<div class="field"><label for="washCycle">Ciclo médio de lavagem (min)</label><input id="washCycle" type="number" min="0" step="5"></div>
+<div class="field"><label for="dryCycle">Ciclo médio de secagem (min)</label><input id="dryCycle" type="number" min="0" step="5"></div>
+</div><div class="actions"><button class="btn" type="submit">Salvar equipamentos</button></div>
+</form>
+<div class="notice warn">Capacidade em kg serve apenas como referência técnica das máquinas. O painel operacional continuará contando peças; não convertemos kg em peças sem medições reais.</div>
+</div>
+</div>
+<div class="card"><h2>Composição de jogos e frequências</h2><p class="muted small">Valores de referência conforme as informações iniciais. Ajuste depois se algum detalhe estiver diferente.</p><div id="kitTable"></div><div class="field" style="margin-top:12px"><label for="curtainInterval">Intervalo de referência para cortinas (dias)</label><input id="curtainInterval" type="number" min="1" step="1" value="30"></div><div class="actions"><button class="btn" onclick="saveOtherConfig()">Salvar frequência</button></div></div>
+</section>
+
+<section class="view" id="dados">
+<div class="sectionhead"><h2>Backup, transferência e análise</h2></div>
+<div class="two">
+<div class="card"><h2>Backup completo</h2><p class="muted small">Exporta configurações, inventários e histórico em JSON. Para transferir para outro aparelho, exporte aqui e importe no outro celular.</p><div class="actions"><button class="btn" onclick="exportJSON()">Exportar backup JSON</button><button class="btn secondary" onclick="document.getElementById('importFile').click()">Importar backup JSON</button><input id="importFile" type="file" accept=".json,application/json" class="hidden"></div><p class="small muted">Importar substitui os dados atuais deste navegador. Faça backup antes, se precisar conservar os dados existentes.</p></div>
+<div class="card"><h2>Exportar para Excel / análise</h2><p class="muted small">Gera uma pasta de trabalho .xlsx com abas formatadas, filtros, títulos e colunas ajustadas. Também mantém CSVs para uso rápido e o pacote JSON para análise.</p><div class="actions"><button class="btn" onclick="exportExcel()">Exportar Excel completo (.xlsx)</button><button class="btn secondary" onclick="exportCSV()">Exportar produção CSV</button><button class="btn secondary" onclick="exportAnalysis()">Exportar pacote de análise</button><button class="btn secondary" onclick="exportStockCSV()">Exportar inventário CSV</button></div></div>
+</div>
+<div class="card"><h2>Privacidade e armazenamento</h2><div class="notice neutral">Os dados ficam neste navegador, neste aparelho. O GitHub Pages publica o aplicativo, mas não sincroniza os dados entre celulares. Exporte backups regularmente e antes de limpar os dados do navegador.</div><div id="dataStats"></div><div class="actions"><button class="btn danger" onclick="resetData()">Apagar todos os dados deste aparelho</button></div></div>
+</section>
+<div class="footer">Lavanderia do Hostel · Unidade São Roque · Desenvolvido por Thiago Fonseca</div>
+</main>
+<script src="script.js"></script>
+</body>
+</html>

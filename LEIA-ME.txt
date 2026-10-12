@@ -1,0 +1,17 @@
+LAVANDERIA DO HOSTEL — UNIDADE SÃO ROQUE
+
+Arquivos do aplicativo:
+- index.html
+- style.css
+- script.js
+
+PUBLICAÇÃO
+1. Envie os três arquivos para a raiz do repositório da unidade São Roque.
+2. Confirme que o arquivo principal se chama index.html.
+3. Ative GitHub Pages nas configurações do repositório.
+
+EXCEL
+O botão “Exportar Excel completo (.xlsx)” gera uma pasta de trabalho com abas de Produção, Inventário, Indicadores, Resumo por etapa e Configuração. Inclui cabeçalhos formatados, filtros, larguras de colunas e congelamento das linhas superiores. A criação do .xlsx é feita localmente pelo próprio JavaScript, sem ExcelJS, CDN ou outra biblioteca externa.
+
+DADOS
+Os registros são salvos localmente no navegador. Use o backup JSON para transportar os dados entre aparelhos. O inventário começa sem quantidades presumidas.
