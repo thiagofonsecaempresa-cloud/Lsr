@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header><div class="inner headrow"><div><h1>Lavanderia do Hostel</h1><p>Unidade São Roque · Enxoval, produtividade, capacidade e previsões</p></div><div class="saved" id="saveState">● Dados locais</div></div></header>
+<header><div class="inner headrow"><div><h1>Lavanderia do Hostel</h1><p>Unidades SR e MK · Enxoval, produtividade, capacidade e previsões</p></div><div class="saved" id="saveState">● Dados locais</div></div></header>
 <main>
 <nav class="tabs">
 <button class="tab active" data-tab="painel">Painel</button><button class="tab" data-tab="registro">Produção diária</button><button class="tab" data-tab="estoque">Inventário</button><button class="tab" data-tab="qualidade">Qualidade</button><button class="tab" data-tab="previsao">Previsões</button><button class="tab" data-tab="config">Configuração</button><button class="tab" data-tab="dados">Backup e relatórios</button>
@@ -22,11 +22,12 @@
 <div class="card"><div class="metriclabel">Horas registradas hoje</div><div class="metric" id="mHours">0h</div><div class="small muted">Tempo declarado nos registros</div></div>
 <div class="card"><div class="metriclabel">Estoque limpo contado</div><div class="metric" id="mStock">Não informado</div><div class="small muted">Só considera inventário preenchido</div></div>
 </div>
+<div class="card"><div class="sectionhead"><h2>Quantidade finalizada por peça no período</h2><span class="muted small">Soma de “Passadas/finalizadas”</span></div><div class="formgrid"><div class="field"><label for="dashboardUnit">Unidade</label><select id="dashboardUnit"></select></div><div class="field"><label for="dashFrom">De</label><input type="date" id="dashFrom"></div><div class="field"><label for="dashTo">Até</label><input type="date" id="dashTo"></div></div><div id="finishedByItem"></div></div>
 <div class="two" style="margin-top:12px">
 <div class="card"><h2>Insights automáticos</h2><div id="insights"></div></div>
 <div class="card"><h2>Capacidade e jornada</h2><div id="capacitySummary"></div><div class="actions"><button class="btn secondary" onclick="switchTab('registro')">Registrar produção</button><button class="btn secondary" onclick="switchTab('estoque')">Fazer inventário</button></div></div>
 </div>
-<div class="card quick-export"><h2>Exportar e importar dados</h2><p class="muted small">Acesso rápido aos arquivos da unidade São Roque. O Excel gera uma planilha .xlsx; CSV abre em planilhas; JSON guarda ou restaura o backup completo.</p><div class="actions"><button class="btn" onclick="exportExcel()">Exportar Excel (.xlsx)</button><button class="btn secondary" onclick="exportCSV()">Exportar produção CSV</button><button class="btn secondary" onclick="exportStockCSV()">Exportar inventário CSV</button><button class="btn secondary" onclick="exportJSON()">Exportar backup JSON</button><button class="btn secondary" onclick="document.getElementById('importFile').click()">Importar backup JSON</button><button class="btn secondary" onclick="exportAnalysis()">Exportar pacote de análise JSON</button></div></div>
+<div class="card quick-export"><h2>Exportar e importar dados</h2><p class="muted small">Acesso rápido aos arquivos das unidades SR e MK. O Excel gera uma planilha .xlsx; CSV abre em planilhas; JSON guarda ou restaura o backup completo.</p><div class="actions"><button class="btn" onclick="exportExcel()">Exportar Excel (.xlsx)</button><button class="btn secondary" onclick="exportCSV()">Exportar produção CSV</button><button class="btn secondary" onclick="exportStockCSV()">Exportar inventário CSV</button><button class="btn secondary" onclick="exportJSON()">Exportar backup JSON</button><button class="btn secondary" onclick="document.getElementById('importFile').click()">Importar backup JSON</button><button class="btn secondary" onclick="exportAnalysis()">Exportar pacote de análise JSON</button></div></div>
 <div class="card"><h2>Últimos registros</h2><div id="recentRecords"></div></div>
 </section>
 
@@ -37,7 +38,7 @@
 <p class="muted small">Escolha a data, a equipe e a etapa uma única vez. Preencha somente as quantidades trabalhadas; os campos zerados serão ignorados.</p>
 <form id="productionForm">
 <div class="formgrid">
-<div class="field"><label for="pDate">Data</label><input type="date" id="pDate" required></div>
+<div class="field"><label for="pUnit">Unidade</label><select id="pUnit"></select></div><div class="field"><label for="pDate">Data</label><input type="date" id="pDate" required></div>
 <div class="field"><label for="pWorker">Responsável / equipe</label><select id="pWorker"><option>Lavagem e secagem</option><option>Passadoria e finalização</option><option>Equipe / geral</option></select></div>
 <div class="field"><label for="pStage">Etapa registrada</label><select id="pStage"><option>Recebidas</option><option>Lavadas</option><option>Secas</option><option>Passadas/finalizadas</option><option>Pendentes ao fim do dia</option><option>Descartadas</option></select></div>
 <div class="field"><label for="pMinutes">Tempo total gasto (minutos)</label><input type="number" id="pMinutes" min="0" step="5" value="0"></div>
@@ -49,14 +50,14 @@
 <div class="field" style="margin-top:12px"><label for="pNotes">Observações do lote</label><textarea id="pNotes" rows="2" placeholder="Ex.: secagem extra, máquina parada, urgência..."></textarea></div>
 <div class="actions"><button class="btn" type="submit">Salvar lote de produção</button><button class="btn secondary" type="reset">Limpar campos</button></div>
 </form></div>
-<div class="card"><h2>Histórico de produção</h2><div class="formgrid"><div class="field"><label for="filterFrom">De</label><input type="date" id="filterFrom"></div><div class="field"><label for="filterTo">Até</label><input type="date" id="filterTo"></div></div><div class="actions"><button class="btn secondary" onclick="renderRecords()">Aplicar filtro</button><button class="btn secondary" onclick="clearFilters()">Limpar filtro</button></div><div id="recordTable" style="margin-top:12px"></div></div>
+<div class="card"><h2>Histórico de produção</h2><div class="formgrid"><div class="field"><label for="filterUnit">Unidade</label><select id="filterUnit"></select></div><div class="field"><label for="filterFrom">De</label><input type="date" id="filterFrom"></div><div class="field"><label for="filterTo">Até</label><input type="date" id="filterTo"></div></div><div class="actions"><button class="btn secondary" onclick="renderRecords()">Aplicar filtro</button><button class="btn secondary" onclick="clearFilters()">Limpar filtro</button></div><div id="recordTable" style="margin-top:12px"></div></div>
 </div>
 </section>
 
 <section class="view" id="estoque">
 <div class="sectionhead"><h2>Inventário e estoque</h2><span class="muted small">Faça a contagem física e atualize os saldos.</span></div>
 <div class="notice neutral">O inventário começa vazio. Preencha apenas quantidades realmente contadas. Separe peças limpas, em uso, sujas/em processamento e inservíveis. Registre peças manchadas ou rasgadas na tela Qualidade. Os números não contados não serão tratados como zero.</div>
-<div class="card"><h2>Contagem física por peça</h2><p class="muted small">Informe as quantidades contadas em cada estado. Deixe em branco o que ainda não foi contado.</p><div id="stockForm"></div>
+<div class="card"><h2>Contagem física por peça</h2><div class="field"><label for="stockUnit">Unidade do inventário</label><select id="stockUnit"></select></div><p class="muted small">Informe as quantidades contadas em cada estado. Deixe em branco o que ainda não foi contado.</p><div id="stockForm"></div>
 <div class="field" style="margin-top:12px"><label for="stockDate">Data do inventário</label><input type="date" id="stockDate"></div><div class="field"><label for="stockNotes">Observações gerais</label><textarea id="stockNotes" rows="2" placeholder="Observações gerais da contagem; registre defeitos individualmente na tela Qualidade."></textarea></div><div class="actions"><button class="btn" onclick="saveStock()">Salvar inventário</button><button class="btn secondary" onclick="clearStockForm()">Limpar campos</button></div></div>
 <div class="card"><h2>Saldo atual informado</h2><div id="stockSummary"></div></div>
 </section>
@@ -73,7 +74,7 @@
 <div class="card"><h2>Registrar ocorrência</h2>
 <form id="qualityForm">
 <div class="formgrid">
-<div class="field"><label for="qDate">Data</label><input type="date" id="qDate" required></div>
+<div class="field"><label for="qUnit">Unidade</label><select id="qUnit"></select></div><div class="field"><label for="qDate">Data</label><input type="date" id="qDate" required></div>
 <div class="field"><label for="qItem">Tipo de peça</label><select id="qItem" required></select></div>
 <div class="field"><label for="qQty">Quantidade afetada (peças)</label><input type="number" id="qQty" min="1" step="1" value="1" required></div>
 <div class="field"><label for="qDefect">Defeito identificado</label><select id="qDefect" required><option>Manchada</option><option>Rasgada</option><option>Descosturada</option><option>Desbotada</option><option>Encardida</option><option>Odor persistente</option><option>Desgaste</option><option>Outro</option></select></div>
@@ -91,11 +92,12 @@
 <div id="qualityByItem"></div>
 </div>
 </div>
-<div class="card"><div class="sectionhead"><h2>Histórico de ocorrências</h2><button class="btn secondary" onclick="exportQualityCSV()">Exportar qualidade CSV</button></div><div class="formgrid"><div class="field"><label for="qFilterStatus">Filtrar situação</label><select id="qFilterStatus"><option value="">Todas</option><option>Aberta</option><option>Aguardando avaliação</option><option>Em tratamento</option><option>Recuperada</option><option>Descartada</option></select></div><div class="field"><label for="qFilterItem">Filtrar peça</label><select id="qFilterItem"><option value="">Todas as peças</option></select></div></div><div id="qualityTable"></div></div>
+<div class="card"><div class="sectionhead"><h2>Histórico de ocorrências</h2><button class="btn secondary" onclick="exportQualityCSV()">Exportar qualidade CSV</button></div><div class="formgrid"><div class="field"><label for="qFilterUnit">Filtrar unidade</label><select id="qFilterUnit"></select></div><div class="field"><label for="qFilterStatus">Filtrar situação</label><select id="qFilterStatus"><option value="">Todas</option><option>Aberta</option><option>Aguardando avaliação</option><option>Em tratamento</option><option>Recuperada</option><option>Descartada</option></select></div><div class="field"><label for="qFilterItem">Filtrar peça</label><select id="qFilterItem"><option value="">Todas as peças</option></select></div></div><div id="qualityTable"></div></div>
 </section>
 
 <section class="view" id="previsao">
 <div class="sectionhead"><h2>Previsão de demanda e capacidade</h2><span class="muted small">As estimativas melhoram conforme entram dados reais.</span></div>
+<div class="card"><div class="field"><label for="forecastUnit">Unidade das previsões</label><select id="forecastUnit"></select></div></div>
 <div class="notice neutral">A previsão inicial usa o histórico registrado. Sem histórico suficiente, o sistema informa a limitação em vez de inventar números. Para prever demanda com base na ocupação, registre as peças recebidas e, quando disponível, alimente a ocupação prevista nas configurações.</div>
 <div class="grid">
 <div class="card"><div class="metriclabel">Média diária recebida</div><div class="metric" id="fDaily">—</div><div class="small muted">Últimos 28 dias com registros</div></div>
@@ -111,7 +113,7 @@
 </section>
 
 <section class="view" id="config">
-<div class="sectionhead"><h2>Configuração da operação</h2></div>
+<div class="sectionhead"><h2>Configuração da operação</h2></div><div class="card"><div class="field"><label for="configUnit">Unidade que está sendo configurada</label><select id="configUnit"></select></div><p class="small muted">Os parâmetros operacionais ficam separados por unidade.</p></div>
 <div class="two">
 <div class="card"><h2>Estrutura do hostel e jornada</h2>
 <form id="configForm">
