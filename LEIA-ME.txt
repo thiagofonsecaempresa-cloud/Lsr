@@ -21,3 +21,6 @@ Excel (.xlsx) com abas formatadas; CSV de produção, inventário e qualidade; b
 
 DADOS
 Os registros são salvos no armazenamento local do navegador. Faça um backup JSON antes de substituir os arquivos no GitHub Pages.
+
+
+Atualização da produção diária: o lançamento agora é feito em lote. Selecione data, responsável/equipe e etapa uma vez, preencha as quantidades de todos os tipos de peça na mesma tela e informe o tempo total do lote. O histórico agrupa as peças do lote e permite excluir o lote inteiro.

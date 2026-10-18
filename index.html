@@ -33,20 +33,21 @@
 <section class="view" id="registro">
 <div class="sectionhead"><h2>Produção diária</h2><span class="muted small">Registre as etapas separadamente para medir os gargalos.</span></div>
 <div class="two">
-<div class="card"><h2>Novo registro</h2>
+<div class="card"><h2>Novo lançamento em lote</h2>
+<p class="muted small">Escolha a data, a equipe e a etapa uma única vez. Preencha somente as quantidades trabalhadas; os campos zerados serão ignorados.</p>
 <form id="productionForm">
 <div class="formgrid">
 <div class="field"><label for="pDate">Data</label><input type="date" id="pDate" required></div>
-<div class="field"><label for="pWorker">Responsável / etapa</label><select id="pWorker"><option>Lavagem e secagem</option><option>Passadoria e finalização</option><option>Equipe / geral</option></select></div>
-<div class="field"><label for="pItem">Tipo de peça</label><select id="pItem"></select></div>
-<div class="field"><label for="pQty">Quantidade (peças)</label><input type="number" id="pQty" min="0" step="1" value="0" required></div>
+<div class="field"><label for="pWorker">Responsável / equipe</label><select id="pWorker"><option>Lavagem e secagem</option><option>Passadoria e finalização</option><option>Equipe / geral</option></select></div>
 <div class="field"><label for="pStage">Etapa registrada</label><select id="pStage"><option>Recebidas</option><option>Lavadas</option><option>Secas</option><option>Passadas/finalizadas</option><option>Pendentes ao fim do dia</option><option>Descartadas</option></select></div>
-<div class="field"><label for="pMinutes">Tempo gasto (minutos)</label><input type="number" id="pMinutes" min="0" step="5" value="0"></div>
-<div class="field"><label for="pStart">Início (opcional)</label><input type="time" id="pStart"></div>
-<div class="field"><label for="pEnd">Fim (opcional)</label><input type="time" id="pEnd"></div>
-<div class="field full"><label for="pNotes">Observações</label><textarea id="pNotes" rows="2" placeholder="Ex.: secagem extra, máquina parada, urgência..."></textarea></div>
+<div class="field"><label for="pMinutes">Tempo total gasto (minutos)</label><input type="number" id="pMinutes" min="0" step="5" value="0"></div>
+<div class="field"><label for="pStart">Horário de início (opcional)</label><input type="time" id="pStart"></div>
+<div class="field"><label for="pEnd">Horário de fim (opcional)</label><input type="time" id="pEnd"></div>
 </div>
-<div class="actions"><button class="btn" type="submit">Salvar registro</button><button class="btn secondary" type="reset">Limpar campos</button></div>
+<div class="batch-heading"><h3>Quantidades por tipo de peça</h3><span class="pill" id="batchTotal">0 peças</span></div>
+<div id="batchItems" class="batch-items"></div>
+<div class="field" style="margin-top:12px"><label for="pNotes">Observações do lote</label><textarea id="pNotes" rows="2" placeholder="Ex.: secagem extra, máquina parada, urgência..."></textarea></div>
+<div class="actions"><button class="btn" type="submit">Salvar lote de produção</button><button class="btn secondary" type="reset">Limpar campos</button></div>
 </form></div>
 <div class="card"><h2>Histórico de produção</h2><div class="formgrid"><div class="field"><label for="filterFrom">De</label><input type="date" id="filterFrom"></div><div class="field"><label for="filterTo">Até</label><input type="date" id="filterTo"></div></div><div class="actions"><button class="btn secondary" onclick="renderRecords()">Aplicar filtro</button><button class="btn secondary" onclick="clearFilters()">Limpar filtro</button></div><div id="recordTable" style="margin-top:12px"></div></div>
 </div>
