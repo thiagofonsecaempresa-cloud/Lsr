@@ -18,3 +18,5 @@
 .pill.warn{background:#fff2d6;color:#986316}
 
 .batch-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:18px 0 8px}.batch-heading h3{margin:0;font-size:15px}.batch-items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 18px;border-top:1px solid var(--line)}.batch-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0;padding:9px 0;border-bottom:1px solid #edf1f7;color:var(--ink);font-size:12px}.batch-row span{flex:1}.batch-row input{width:82px;flex:0 0 82px;text-align:center;padding:8px 5px}.batch-row input::-webkit-inner-spin-button{opacity:1}@media(max-width:760px){.batch-items{grid-template-columns:1fr}.batch-row{font-size:13px}}
+
+.time-parts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.time-parts label{display:flex;flex-direction:column;gap:5px;color:var(--muted)}.time-parts input{width:100%;min-width:0}

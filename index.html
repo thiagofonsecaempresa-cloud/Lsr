@@ -40,8 +40,9 @@
 <div class="formgrid">
 <div class="field"><label for="pUnit">Unidade</label><select id="pUnit"></select></div><div class="field"><label for="pDate">Data</label><input type="date" id="pDate" required></div>
 <div class="field"><label for="pWorker">Responsável / equipe</label><select id="pWorker"><option>Lavagem e secagem</option><option>Passadoria e finalização</option><option>Equipe / geral</option></select></div>
-<div class="field"><label for="pStage">Etapa registrada</label><select id="pStage"><option>Recebidas</option><option>Lavadas</option><option>Secas</option><option>Passadas/finalizadas</option><option>Pendentes ao fim do dia</option><option>Descartadas</option></select></div>
-<div class="field"><label for="pMinutes">Tempo total gasto (minutos)</label><input type="number" id="pMinutes" min="0" step="5" value="0"></div>
+<div class="field"><label for="pStage">Etapa registrada</label><select id="pStage"><option>Recebidas</option><option>Lavadas</option><option>Secas na máquina</option><option>Pendente no varal</option><option>Secas do varal</option><option>Passadas/finalizadas</option><option>Pendentes ao fim do dia</option><option>Descartadas</option></select></div>
+<div class="field"><label for="pMinutes">Tempo de trabalho (minutos, opcional)</label><input type="number" id="pMinutes" min="0" step="5" value="0"><span class="small muted">Usado nos cálculos de produtividade; informe o trabalho efetivo, não o tempo de espera no varal.</span></div>
+<div class="field"><label>Tempo decorrido da etapa (opcional)</label><div class="time-parts"><label for="pElapsedDays" class="small">Dias<input type="number" id="pElapsedDays" min="0" step="1" value="0"></label><label for="pElapsedHours" class="small">Horas<input type="number" id="pElapsedHours" min="0" max="23" step="1" value="0"></label><label for="pElapsedMinutes" class="small">Minutos<input type="number" id="pElapsedMinutes" min="0" max="59" step="1" value="0"></label></div><span class="small muted">Ex.: 1 dia, 2 horas e 30 minutos aguardando secagem.</span></div>
 <div class="field"><label for="pStart">Horário de início (opcional)</label><input type="time" id="pStart"></div>
 <div class="field"><label for="pEnd">Horário de fim (opcional)</label><input type="time" id="pEnd"></div>
 </div>

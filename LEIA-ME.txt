@@ -32,3 +32,10 @@ Configuração operacional também separada por unidade SR e MK. Exportação Ex
 
 
 Atualização do inventário: categorias Limpa, Em uso, Suja e Inservível, com coluna Total calculada por peça. O total soma as quatro situações; campos todos em branco continuam sem total, para não confundir ausência de contagem com zero. A movimentação continua manual nesta versão.
+
+Atualização da produção — versão 6:
+- Etapas de secagem diferenciadas: Secas na máquina, Pendente no varal e Secas do varal. A etapa antiga “Secas” continua reconhecida nos registros existentes.
+- Tempo de trabalho (minutos) fica separado do tempo decorrido da etapa (dias, horas e minutos). Use o tempo de trabalho para estimar produtividade e o tempo decorrido para registrar esperas, como roupa pendurada no varal.
+- Horários de início e fim continuam opcionais e são armazenados como referência; não calculam automaticamente a duração.
+- Histórico, CSV, Excel e pacote de análise incluem os novos campos de tempo; o tempo de trabalho continua contado uma única vez por lote nos indicadores.
+- Os registros anteriores são preservados. Registros antigos não terão tempo decorrido preenchido automaticamente.
