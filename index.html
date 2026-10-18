@@ -56,7 +56,7 @@
 
 <section class="view" id="estoque">
 <div class="sectionhead"><h2>Inventário e estoque</h2><span class="muted small">Faça a contagem física e atualize os saldos.</span></div>
-<div class="notice neutral">O inventário começa vazio. Preencha apenas quantidades realmente contadas. Separe peças limpas, em uso, sujas/em processamento e inservíveis. Registre peças manchadas ou rasgadas na tela Qualidade. Os números não contados não serão tratados como zero.</div>
+<div class="notice neutral">O inventário começa vazio. Preencha apenas quantidades realmente contadas. Separe peças limpas, em uso, sujas e inservíveis. O total por peça soma as quatro situações. Registre peças manchadas ou rasgadas na tela Qualidade. Os números não contados não serão tratados como zero.</div>
 <div class="card"><h2>Contagem física por peça</h2><div class="field"><label for="stockUnit">Unidade do inventário</label><select id="stockUnit"></select></div><p class="muted small">Informe as quantidades contadas em cada estado. Deixe em branco o que ainda não foi contado.</p><div id="stockForm"></div>
 <div class="field" style="margin-top:12px"><label for="stockDate">Data do inventário</label><input type="date" id="stockDate"></div><div class="field"><label for="stockNotes">Observações gerais</label><textarea id="stockNotes" rows="2" placeholder="Observações gerais da contagem; registre defeitos individualmente na tela Qualidade."></textarea></div><div class="actions"><button class="btn" onclick="saveStock()">Salvar inventário</button><button class="btn secondary" onclick="clearStockForm()">Limpar campos</button></div></div>
 <div class="card"><h2>Saldo atual informado</h2><div id="stockSummary"></div></div>

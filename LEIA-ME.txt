@@ -29,3 +29,6 @@ Atualização da produção diária: o lançamento agora é feito em lote. Selec
 Versão atualizada: lançamento em lote com catálogo incluindo Capa de edredom; painel com finalização por peça e período; separação por Unidade SR e Unidade MK na produção, inventário, qualidade, previsões e exportações. Registros antigos sem unidade são tratados como Unidade SR.
 
 Configuração operacional também separada por unidade SR e MK. Exportação Excel inclui as duas unidades no inventário e na configuração.
+
+
+Atualização do inventário: categorias Limpa, Em uso, Suja e Inservível, com coluna Total calculada por peça. O total soma as quatro situações; campos todos em branco continuam sem total, para não confundir ausência de contagem com zero. A movimentação continua manual nesta versão.
