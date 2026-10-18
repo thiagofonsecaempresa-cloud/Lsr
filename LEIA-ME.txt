@@ -1,4 +1,4 @@
-LAVANDERIA DO HOSTEL — UNIDADE SÃO ROQUE
+LAVANDERIA DO HOSTEL — UNIDADES SR E MK
 
 Arquivos:
 - index.html
@@ -45,3 +45,14 @@ Atualização do painel — pendências automáticas:
 - O indicador “Peças pendentes” calcula o saldo atual por unidade e tipo de peça: total recebido menos total finalizado e descartado, considerando todo o histórico registrado.
 - Não é necessário lançar “Pendentes ao fim do dia”. Peças “Pendente no varal” já fazem parte do saldo não finalizado e não são somadas uma segunda vez.
 - Para um saldo confiável, registre as quantidades recebidas, finalizadas e descartadas de cada tipo de peça. O indicador usa os registros disponíveis; não consegue inferir recebimentos anteriores que nunca foram registrados.
+
+
+NOVA VERSÃO — ROTATIVIDADE DO ENXOVAL
+- Nova aba Rotatividade separada do inventário físico.
+- Inicie a rotatividade usando o inventário salvo de cada unidade. Para garantir o saldo de abertura, preencha os quatro estados (Limpa, Em uso, Suja e Inservível) para todos os tipos de peça; onde não houver peças, informe 0.
+- A quantidade suja do inventário de abertura inclui tudo que ainda precisa de trabalho, inclusive peças já recebidas e roupas no varal. Os registros antigos de produção não são reaplicados.
+- Depois da abertura, “Recebidas” transfere de Em uso para Suja; as etapas de lavagem/secagem transferem quantidades entre estados; “Passadas/finalizadas” significa finalizadas e entregues, retornando as peças para Em uso; “Descartadas” reduz o total do enxoval.
+- Compras de enxoval aumentam o total e entram como Limpa disponível ou Suja. A movimentação normal entre etapas não altera o total.
+- O painel de peças pendentes passa a usar o saldo real das etapas quando a rotatividade estiver ativa.
+- O Excel inclui abas Rotatividade e Mov. rotatividade; o backup JSON preserva todos os saldos e movimentos.
+- Não exclua pelo histórico um lote que já movimentou a rotatividade; isso poderia deixar o saldo divergente.

@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#172f4f">
-<title>Lavanderia do Hostel | Unidade São Roque</title>
+<title>Lavanderia do Hostel | Unidades SR e MK</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header><div class="inner headrow"><div><h1>Lavanderia do Hostel</h1><p>Unidades SR e MK · Enxoval, produtividade, capacidade e previsões</p></div><div class="saved" id="saveState">● Dados locais</div></div></header>
 <main>
 <nav class="tabs">
-<button class="tab active" data-tab="painel">Painel</button><button class="tab" data-tab="registro">Produção diária</button><button class="tab" data-tab="estoque">Inventário</button><button class="tab" data-tab="qualidade">Qualidade</button><button class="tab" data-tab="previsao">Previsões</button><button class="tab" data-tab="config">Configuração</button><button class="tab" data-tab="dados">Backup e relatórios</button>
+<button class="tab active" data-tab="painel">Painel</button><button class="tab" data-tab="registro">Produção diária</button><button class="tab" data-tab="estoque">Inventário</button><button class="tab" data-tab="rotatividade">Rotatividade</button><button class="tab" data-tab="qualidade">Qualidade</button><button class="tab" data-tab="previsao">Previsões</button><button class="tab" data-tab="config">Configuração</button><button class="tab" data-tab="dados">Backup e relatórios</button>
 </nav>
 
 <section class="view active" id="painel">
@@ -35,12 +35,12 @@
 <div class="sectionhead"><h2>Produção diária</h2><span class="muted small">Registre as etapas separadamente para medir os gargalos.</span></div>
 <div class="two">
 <div class="card"><h2>Novo lançamento em lote</h2>
-<p class="muted small">Escolha a data, a equipe e a etapa uma única vez. Preencha somente as quantidades trabalhadas; os campos zerados serão ignorados.</p>
+<p class="muted small">Escolha a data, a equipe e a etapa uma única vez. Com a rotatividade ativa, cada etapa transfere as peças de um estado para outro; “Recebidas” move de Em uso para Suja, “Passadas/finalizadas” devolve ao hostel e “Descartadas” reduz o total. Os campos zerados serão ignorados.</p>
 <form id="productionForm">
 <div class="formgrid">
 <div class="field"><label for="pUnit">Unidade</label><select id="pUnit"></select></div><div class="field"><label for="pDate">Data</label><input type="date" id="pDate" required></div>
 <div class="field"><label for="pWorker">Responsável / equipe</label><select id="pWorker"><option>Lavagem e secagem</option><option>Passadoria e finalização</option><option>Equipe / geral</option></select></div>
-<div class="field"><label for="pStage">Etapa registrada</label><select id="pStage"><option>Recebidas</option><option>Lavadas</option><option>Secas na máquina</option><option>Pendente no varal</option><option>Secas do varal</option><option>Passadas/finalizadas</option><option>Pendentes ao fim do dia</option><option>Descartadas</option></select></div>
+<div class="field"><label for="pStage">Etapa registrada</label><select id="pStage"><option>Recebidas</option><option>Lavadas</option><option>Secas na máquina</option><option>Pendente no varal</option><option>Secas do varal</option><option>Passadas/finalizadas</option><option>Pendentes ao fim do dia</option><option>Descartadas</option></select></div><div class="field" id="pFromStageWrap"><label for="pFromStage">Sai de qual etapa?</label><select id="pFromStage"><option value="dirty">Suja / saldo inicial</option><option value="washed">Lavada</option><option value="machineDry">Seca na máquina</option><option value="lineWet">Pendente no varal</option><option value="lineDry">Seca do varal</option><option value="clean">Limpa disponível</option><option value="inUse">Em uso no hostel</option><option value="unusable">Inservível</option></select><span class="small muted">Na finalização ou descarte, escolha de onde as peças estão saindo. Nas demais etapas, o sistema sugere a etapa anterior.</span></div>
 <div class="field"><label for="pMinutes">Tempo de trabalho (minutos, opcional)</label><input type="number" id="pMinutes" min="0" step="5" value="0"><span class="small muted">Usado nos cálculos de produtividade; informe o trabalho efetivo, não o tempo de espera no varal.</span></div>
 <div class="field"><label>Tempo decorrido da etapa (opcional)</label><div class="time-parts"><label for="pElapsedDays" class="small">Dias<input type="number" id="pElapsedDays" min="0" step="1" value="0"></label><label for="pElapsedHours" class="small">Horas<input type="number" id="pElapsedHours" min="0" max="23" step="1" value="0"></label><label for="pElapsedMinutes" class="small">Minutos<input type="number" id="pElapsedMinutes" min="0" max="59" step="1" value="0"></label></div><span class="small muted">Ex.: 1 dia, 2 horas e 30 minutos aguardando secagem.</span></div>
 <div class="field"><label for="pStart">Horário de início (opcional)</label><input type="time" id="pStart"></div>
@@ -57,14 +57,22 @@
 
 <section class="view" id="estoque">
 <div class="sectionhead"><h2>Inventário e estoque</h2><span class="muted small">Faça a contagem física e atualize os saldos.</span></div>
-<div class="notice neutral">O inventário começa vazio. Preencha apenas quantidades realmente contadas. Separe peças limpas, em uso, sujas e inservíveis. O total por peça soma as quatro situações. Registre peças manchadas ou rasgadas na tela Qualidade. Os números não contados não serão tratados como zero.</div>
+<div class="notice neutral">Preencha as quantidades físicas de peças limpas, em uso, sujas e inservíveis. O total por peça soma as quatro situações. Campos em branco não significam zero. Após salvar o inventário de abertura, inicie a rotatividade na aba própria; inventários físicos posteriores não reiniciam automaticamente a movimentação.</div>
 <div class="card"><h2>Contagem física por peça</h2><div class="field"><label for="stockUnit">Unidade do inventário</label><select id="stockUnit"></select></div><p class="muted small">Informe as quantidades contadas em cada estado. Deixe em branco o que ainda não foi contado.</p><div id="stockForm"></div>
 <div class="field" style="margin-top:12px"><label for="stockDate">Data do inventário</label><input type="date" id="stockDate"></div><div class="field"><label for="stockNotes">Observações gerais</label><textarea id="stockNotes" rows="2" placeholder="Observações gerais da contagem; registre defeitos individualmente na tela Qualidade."></textarea></div><div class="actions"><button class="btn" onclick="saveStock()">Salvar inventário</button><button class="btn secondary" onclick="clearStockForm()">Limpar campos</button></div></div>
 <div class="card"><h2>Saldo atual informado</h2><div id="stockSummary"></div></div>
 </section>
 
+<section class="view" id="rotatividade">
+<div class="sectionhead"><h2>Rotatividade do enxoval</h2><span class="muted small">Acompanhe o caminho das mesmas peças, sem somar cada etapa como se fossem peças novas.</span></div>
+<div class="notice neutral">Primeiro salve o inventário físico completo de hoje. Depois, inicie a rotatividade para essa unidade. O saldo inicial será capturado uma única vez. As peças que já estavam sujas, no varal ou em processamento entram no saldo inicial como “Suja”; não precisam ser lançadas novamente como recebidas.</div>
+<div class="card"><h2>Saldo de abertura e situação atual</h2><div class="field"><label for="rotationUnit">Unidade</label><select id="rotationUnit"></select></div><div id="rotationSummary"></div><div class="actions"><button class="btn" id="startRotationBtn" onclick="startRotation()">Iniciar rotatividade com inventário salvo</button></div></div>
+<div class="two"><div class="card"><h2>Adicionar enxoval comprado</h2><p class="muted small">Use somente para peças novas compradas. Isso aumenta o total do enxoval e adiciona as peças ao estado escolhido.</p><form id="purchaseForm"><div class="formgrid"><div class="field"><label for="purchaseItem">Tipo de peça</label><select id="purchaseItem"></select></div><div class="field"><label for="purchaseQty">Quantidade comprada</label><input id="purchaseQty" type="number" min="1" step="1" value="1" required></div><div class="field"><label for="purchaseStage">Estado ao entrar</label><select id="purchaseStage"><option value="clean">Limpa disponível</option><option value="dirty">Suja</option></select></div><div class="field"><label for="purchaseDate">Data da compra</label><input id="purchaseDate" type="date" required></div></div><div class="field"><label for="purchaseNotes">Observações</label><input id="purchaseNotes" placeholder="Ex.: compra de 12 fronhas"></div><button class="btn" type="submit">Registrar compra</button></form></div><div class="card"><h2>Movimentações recentes</h2><div id="rotationHistory"></div></div></div>
+<div class="card"><h2>Saldo por tipo de peça</h2><div id="rotationTable"></div></div>
+</section>
+
 <section class="view" id="qualidade">
-<div class="sectionhead"><h2>Qualidade e ocorrências</h2><span class="muted small">Peças com defeito, tratamento e destino.</span></div>
+<div class="sectionhead"><h2>Qualidade e ocorrências</h2><span class="muted small">Peças com defeito, tratamento e destino.</span></div><div class="notice neutral">A tela Qualidade registra o problema e a providência. Quando a peça for efetivamente descartada e a rotatividade estiver ativa, registre também “Descartadas” em Produção diária para reduzir o saldo total do enxoval.</div>
 <div class="grid quality-metrics">
 <div class="card"><div class="metriclabel">Ocorrências em aberto</div><div class="metric" id="qOpen">0</div></div>
 <div class="card"><div class="metriclabel">Peças aguardando decisão</div><div class="metric" id="qWaiting">0</div></div>
@@ -157,7 +165,7 @@
 </div>
 <div class="card"><h2>Privacidade e armazenamento</h2><div class="notice neutral">Os dados ficam neste navegador, neste aparelho. O GitHub Pages publica o aplicativo, mas não sincroniza os dados entre celulares. Exporte backups regularmente e antes de limpar os dados do navegador.</div><div id="dataStats"></div><div class="actions"><button class="btn danger" onclick="resetData()">Apagar todos os dados deste aparelho</button></div></div>
 </section>
-<div class="footer">Lavanderia do Hostel · Unidade São Roque · Desenvolvido por Thiago Fonseca</div>
+<div class="footer">Lavanderia do Hostel · Unidades SR e MK · Desenvolvido por Thiago Fonseca · Versão 8</div>
 </main>
 <script src="script.js"></script>
 </body>
