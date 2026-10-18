@@ -187,7 +187,7 @@ function resetData(){if(!confirm("Tem certeza? Isso apagará todos os dados loca
 
 async function exportExcel(){
   // Geração XLSX local: XML + ZIP STORE, sem bibliotecas ou serviços externos.
-  const escXml = v => String(v ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;");
+  const escXml = v => String(v ?? "").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g, "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;");
   const colName = n => {let s="";while(n){let r=(n-1)%26;s=String.fromCharCode(65+r)+s;n=Math.floor((n-1)/26)}return s};
   const serialDate = d => {const t = new Date(d.getFullYear(),d.getMonth(),d.getDate());return Math.floor((t-new Date(1899,11,30))/86400000)};
   function xmlCell(value, ref, style=0){
@@ -264,4 +264,10 @@ populateItemSelect();
 document.getElementById("pUnit").innerHTML=unitOptions();document.getElementById("filterUnit").innerHTML=unitOptions(true);document.getElementById("dashboardUnit").innerHTML='<option value="ALL">Todas as unidades</option>'+unitOptions();document.getElementById("stockUnit").innerHTML=unitOptions();document.getElementById("rotationUnit").innerHTML=unitOptions();document.getElementById("purchaseItem").innerHTML=ITEMS.map(([n])=>`<option>${esc(n)}</option>`).join("");document.getElementById("qUnit").innerHTML=unitOptions();document.getElementById("qFilterUnit").innerHTML=unitOptions(true);document.getElementById("forecastUnit").innerHTML=unitOptions();document.getElementById("configUnit").innerHTML=unitOptions();
 document.getElementById("dashboardUnit").value="SR";document.getElementById("dashFrom").value=today().slice(0,7)+"-01";document.getElementById("dashTo").value=today();
 ["dashboardUnit","dashFrom","dashTo"].forEach(id=>document.getElementById(id).addEventListener("change",renderDashboard));document.getElementById("filterUnit").addEventListener("change",renderRecords);document.getElementById("stockUnit").addEventListener("change",renderStock);document.getElementById("rotationUnit").addEventListener("change",renderRotation);document.getElementById("pStage").addEventListener("change",updateFromStage);document.getElementById("pUnit").addEventListener("change",updateFromStage);document.getElementById("purchaseForm").addEventListener("submit",registerPurchase);document.getElementById("forecastUnit").addEventListener("change",renderForecast);document.getElementById("configUnit").addEventListener("change",()=>{db.config={...(db.configByUnit?.[selectedUnit("configUnit")]||DEFAULT.config)};renderConfig();});
+// Reforço de inicialização dos seletores de unidade (evita dropdown vazio após atualização).
+["pUnit","stockUnit","rotationUnit","qUnit","forecastUnit","configUnit"].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el && !el.options.length) el.innerHTML=unitOptions();
+});
+if(document.getElementById("rotationUnit") && !document.getElementById("rotationUnit").value) document.getElementById("rotationUnit").value="SR";
 initFields();document.getElementById("purchaseDate").value=today();initQuality();updateFromStage();document.getElementById("todayLabel").textContent=dateFmt(today());renderAll();
