@@ -39,3 +39,9 @@ Atualização da produção — versão 6:
 - Horários de início e fim continuam opcionais e são armazenados como referência; não calculam automaticamente a duração.
 - Histórico, CSV, Excel e pacote de análise incluem os novos campos de tempo; o tempo de trabalho continua contado uma única vez por lote nos indicadores.
 - Os registros anteriores são preservados. Registros antigos não terão tempo decorrido preenchido automaticamente.
+
+
+Atualização do painel — pendências automáticas:
+- O indicador “Peças pendentes” calcula o saldo atual por unidade e tipo de peça: total recebido menos total finalizado e descartado, considerando todo o histórico registrado.
+- Não é necessário lançar “Pendentes ao fim do dia”. Peças “Pendente no varal” já fazem parte do saldo não finalizado e não são somadas uma segunda vez.
+- Para um saldo confiável, registre as quantidades recebidas, finalizadas e descartadas de cada tipo de peça. O indicador usa os registros disponíveis; não consegue inferir recebimentos anteriores que nunca foram registrados.

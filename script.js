@@ -74,10 +74,24 @@ function finalByDate(date){return db.records.filter(r=>r.date===date&&r.stage===
 function estimateDemandPerDay(){const dates=recentDays(28);return dates.length?mean(dates.map(receiveByDate)):null}
 function forecastWeekdays(){const by=[[],[],[],[],[],[],[]];const dates=recentDays(56);dates.forEach(d=>{const dow=(new Date(d+"T12:00:00")).getDay();by[dow].push(receiveByDate(d))});return by.map(a=>a.length?mean(a):null)}
 function productionRate(){const rs=db.records.filter(r=>r.stage==="Passadas/finalizadas"),groups=new Map();rs.forEach(r=>{const key=r.batchId||r.id;if(!groups.has(key))groups.set(key,{qty:0,minutes:0});groups.get(key).qty+=num(r.qty);groups.get(key).minutes=Math.max(groups.get(key).minutes,num(r.minutes))});const measured=[...groups.values()].filter(r=>r.minutes>0),q=measured.reduce((s,r)=>s+r.qty,0),m=measured.reduce((s,r)=>s+r.minutes,0);return m>0?q/(m/60):null}
-function pendingLatest(){const latest=[...new Set(db.records.map(r=>r.date))].sort().pop();if(!latest)return 0;const a=stageSum(latest,"Pendentes ao fim do dia");return a}
+function pendingQuantity(unitMatch){
+  // Saldo atual por unidade e tipo de peça: recebidas menos finalizadas e descartadas.
+  // A pendência de varal é parte desse saldo, não uma quantidade adicional.
+  const balances=new Map();
+  db.records.filter(unitMatch).forEach(r=>{
+    if(!["Recebidas","Passadas/finalizadas","Descartadas"].includes(r.stage))return;
+    const key=`${r.unit||"SR"}|${r.item}`;
+    if(!balances.has(key))balances.set(key,{received:0,finished:0,discarded:0});
+    const b=balances.get(key),qty=num(r.qty);
+    if(r.stage==="Recebidas")b.received+=qty;
+    else if(r.stage==="Passadas/finalizadas")b.finished+=qty;
+    else b.discarded+=qty;
+  });
+  return [...balances.values()].reduce((sum,b)=>sum+Math.max(0,b.received-b.finished-b.discarded),0);
+}
 function renderDashboard(){
 const d=today(),dashboardUnit=selectedUnit("dashboardUnit"),unitMatch=r=>dashboardUnit==="ALL"||(r.unit||"SR")===dashboardUnit;document.getElementById("todayLabel").textContent=dateFmt(d);
-document.getElementById("mDone").textContent=fmt(db.records.filter(r=>r.date===d&&r.stage==="Passadas/finalizadas"&&unitMatch(r)).reduce((s,r)=>s+num(r.qty),0));document.getElementById("mPending").textContent=fmt(db.records.filter(r=>r.date===d&&r.stage==="Pendentes ao fim do dia"&&unitMatch(r)).reduce((s,r)=>s+num(r.qty),0));const dayBatches=new Map();db.records.filter(r=>r.date===d&&unitMatch(r)).forEach(r=>{const k=r.batchId||r.id;dayBatches.set(k,Math.max(dayBatches.get(k)||0,num(r.minutes)))});document.getElementById("mHours").textContent=(Array.from(dayBatches.values()).reduce((s,v)=>s+v,0)/60).toLocaleString("pt-BR",{maximumFractionDigits:1})+"h";
+document.getElementById("mDone").textContent=fmt(db.records.filter(r=>r.date===d&&r.stage==="Passadas/finalizadas"&&unitMatch(r)).reduce((s,r)=>s+num(r.qty),0));document.getElementById("mPending").textContent=fmt(pendingQuantity(unitMatch));const dayBatches=new Map();db.records.filter(r=>r.date===d&&unitMatch(r)).forEach(r=>{const k=r.batchId||r.id;dayBatches.set(k,Math.max(dayBatches.get(k)||0,num(r.minutes)))});document.getElementById("mHours").textContent=(Array.from(dayBatches.values()).reduce((s,v)=>s+v,0)/60).toLocaleString("pt-BR",{maximumFractionDigits:1})+"h";
 const st=dashboardUnit==="ALL"?{clean:stockTotals("SR").clean+stockTotals("MK").clean,knownItems:stockTotals("SR").knownItems+stockTotals("MK").knownItems}:stockTotals(dashboardUnit);const activeStock=dashboardUnit==="ALL"?(db.stockByUnit?.SR||db.stockByUnit?.MK):(db.stockByUnit?.[dashboardUnit]||((dashboardUnit==="SR")?db.stock:null));document.getElementById("mStock").textContent=activeStock?fmt(st.clean):"—";
 const scopedRecords=db.records.filter(unitMatch),receivedDates=[...new Set(scopedRecords.filter(r=>r.stage==="Recebidas").map(r=>r.date))].sort().slice(-28),received=receivedDates.length?mean(receivedDates.map(day=>scopedRecords.filter(r=>r.date===day&&r.stage==="Recebidas").reduce((s,r)=>s+num(r.qty),0))):null;const finalGroups=new Map();scopedRecords.filter(r=>r.stage==="Passadas/finalizadas").forEach(r=>{const k=r.batchId||r.id;if(!finalGroups.has(k))finalGroups.set(k,{qty:0,minutes:0});const g=finalGroups.get(k);g.qty+=num(r.qty);g.minutes=Math.max(g.minutes,num(r.minutes));});const measured=[...finalGroups.values()].filter(g=>g.minutes>0),rateMinutes=measured.reduce((s,g)=>s+g.minutes,0),rate=rateMinutes?measured.reduce((s,g)=>s+g.qty,0)/(rateMinutes/60):null,hours=hoursAvailable(dashboardUnit),capacity=rate?rate*hours:null;
 let insights=[];
