@@ -57,18 +57,18 @@
 
 <section class="view" id="estoque">
 <div class="sectionhead"><h2>Inventário e estoque</h2><span class="muted small">Faça a contagem física e atualize os saldos.</span></div>
-<div class="notice neutral">Preencha as quantidades físicas de peças limpas, em uso, sujas e inservíveis. O total por peça soma as quatro situações. Campos em branco não significam zero. Após salvar o inventário de abertura, inicie a rotatividade na aba própria; inventários físicos posteriores não reiniciam automaticamente a movimentação.</div>
-<div class="card"><h2>Contagem física por peça</h2><div class="field"><label for="stockUnit">Unidade do inventário</label><select id="stockUnit"></select></div><p class="muted small">Informe as quantidades contadas em cada estado. Deixe em branco o que ainda não foi contado.</p><div id="stockForm"></div>
+<div class="notice neutral">Preencha apenas três saldos: Hostel (peças nos quartos ou no estoque), Lavanderia (peças sujas ou em processamento) e Inservível. Campos em branco não significam zero.</div>
+<div class="card"><h2>Contagem física por peça</h2><div class="field"><label for="stockUnit">Unidade do inventário</label><select id="stockUnit"></select></div><p class="muted small">Some todas as peças disponíveis no Hostel, independentemente de estarem nos quartos ou guardadas.</p><div id="stockForm"></div>
 <div class="field" style="margin-top:12px"><label for="stockDate">Data do inventário</label><input type="date" id="stockDate"></div><div class="field"><label for="stockNotes">Observações gerais</label><textarea id="stockNotes" rows="2" placeholder="Observações gerais da contagem; registre defeitos individualmente na tela Qualidade."></textarea></div><div class="actions"><button class="btn" onclick="saveStock()">Salvar inventário</button><button class="btn secondary" onclick="clearStockForm()">Limpar campos</button></div></div>
 <div class="card"><h2>Saldo atual informado</h2><div id="stockSummary"></div></div>
 </section>
 
 <section class="view" id="rotatividade">
 <div class="sectionhead"><h2>Rotatividade do enxoval</h2><span class="muted small">Acompanhe o caminho das mesmas peças, sem somar cada etapa como se fossem peças novas.</span></div>
-<div class="notice neutral">Primeiro salve o inventário físico completo de hoje. Depois, inicie a rotatividade para essa unidade. O saldo inicial será capturado uma única vez. As peças que já estavam sujas, no varal ou em processamento entram no saldo inicial como “Suja”; não precisam ser lançadas novamente como recebidas.</div>
+<div class="notice neutral">Primeiro salve o inventário físico completo de hoje. Depois, inicie a rotatividade para essa unidade. O saldo inicial será capturado uma única vez. O inventário tem três saldos: Hostel, Lavanderia e Inservível. A tela abaixo detalha as pendências da Lavanderia por etapa, sem criar novos saldos.</div>
 <div class="card"><h2>Saldo de abertura e situação atual</h2><div class="field"><label for="rotationUnit">Unidade</label><select id="rotationUnit"></select></div><div id="rotationSummary"></div><div class="actions"><button class="btn" id="startRotationBtn" onclick="startRotation()">Iniciar rotatividade com inventário salvo</button></div></div>
 <div class="two"><div class="card"><h2>Adicionar enxoval comprado</h2><p class="muted small">Use somente para peças novas compradas. Isso aumenta o total do enxoval e adiciona as peças ao estado escolhido.</p><form id="purchaseForm"><div class="formgrid"><div class="field"><label for="purchaseItem">Tipo de peça</label><select id="purchaseItem"></select></div><div class="field"><label for="purchaseQty">Quantidade comprada</label><input id="purchaseQty" type="number" min="1" step="1" value="1" required></div><div class="field"><label for="purchaseStage">Estado ao entrar</label><select id="purchaseStage"><option value="clean">Limpa disponível</option><option value="dirty">Suja</option></select></div><div class="field"><label for="purchaseDate">Data da compra</label><input id="purchaseDate" type="date" required></div></div><div class="field"><label for="purchaseNotes">Observações</label><input id="purchaseNotes" placeholder="Ex.: compra de 12 fronhas"></div><button class="btn" type="submit">Registrar compra</button></form></div><div class="card"><h2>Movimentações recentes</h2><div id="rotationHistory"></div></div></div>
-<div class="card"><h2>Saldo por tipo de peça</h2><div id="rotationTable"></div></div>
+<div class="card"><h2>Pendências da lavanderia</h2><p class="muted small">Consulta rápida do que está sujo, lavado, na máquina ou no varal.</p><div id="laundryPending"></div></div><div class="card"><h2>Saldo por tipo de peça</h2><div id="rotationTable"></div></div>
 </section>
 
 <section class="view" id="qualidade">
@@ -167,6 +167,6 @@
 </section>
 <div class="footer">Lavanderia do Hostel · Unidades SR e MK · Desenvolvido por Thiago Fonseca · Versão 8</div>
 </main>
-<script src="script.js?v=hostel-recebidas-fix-20261101"></script>
+<script src="script.js?v=inventory-hostel-v2-20261101"></script>
 </body>
 </html>
